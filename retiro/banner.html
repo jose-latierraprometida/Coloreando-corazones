@@ -1,0 +1,71 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F6D9A8;--olive:#A69564;--brown:#4C2D1A;--terra:#9B5137;--ochre:#915B20}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:3000px;height:1000px;overflow:hidden;background:var(--brown)}
+.c{position:relative;width:3000px;height:1000px;color:var(--cream);font-family:'Fraunces',serif;
+ font-variation-settings:'SOFT' 100,'WONK' 1;
+ background:radial-gradient(1400px 900px at 30% 45%, #5a3621 0%, var(--brown) 60%, #3f2414 100%)}
+.f{font-variation-settings:'SOFT' 100,'WONK' 1,'opsz' 144}
+.label{position:absolute;font-size:30px;letter-spacing:.32em;text-transform:uppercase;font-weight:400;font-variation-settings:'SOFT' 100,'opsz' 14}
+.top-l{left:170px;top:120px;display:flex;align-items:center;gap:28px}
+.top-l i{display:block;width:90px;height:1.5px;background:var(--olive)}
+.title{position:absolute;left:160px;top:210px;font-weight:350;font-size:250px;line-height:.92;letter-spacing:-.015em}
+.title em{font-style:italic;font-weight:300;color:var(--olive)}
+.title .l2{display:block;padding-left:240px}
+.foot{position:absolute;left:170px;bottom:118px;display:flex;align-items:center;gap:40px}
+.by{font-style:italic;font-size:56px;font-weight:350;font-variation-settings:'SOFT' 100,'WONK' 1,'opsz' 72}
+.by span{font-style:normal;font-size:30px;letter-spacing:.3em;text-transform:uppercase;color:var(--olive);margin-right:18px;vertical-align:middle;font-variation-settings:'SOFT' 100,'opsz' 14}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--terra)}
+.place{font-size:30px;letter-spacing:.32em;text-transform:uppercase;font-variation-settings:'SOFT' 100,'opsz' 14}
+.arch-o{position:absolute;left:2016px;top:86px;width:808px;height:828px;border:1.5px solid rgba(246,217,168,.45);border-radius:404px 404px 0 0;border-bottom:none}
+.arch{position:absolute;left:2040px;top:110px;width:760px;height:804px;border-radius:380px 380px 0 0;overflow:hidden;background:var(--terra)}
+.side{position:absolute;left:1905px;top:500px;transform:translate(-50%,-50%) rotate(-90deg);font-size:24px;letter-spacing:.4em;text-transform:uppercase;color:var(--olive);white-space:nowrap;font-variation-settings:'SOFT' 100,'opsz' 14}
+.base{position:absolute;left:1940px;right:60px;top:913px;height:1.5px;background:rgba(246,217,168,.45)}
+.grain{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.55}
+.grain2{position:absolute;inset:0;pointer-events:none;opacity:.07}
+</style></head>
+<body><div class="c">
+  <div class="label top-l">Retiro <i></i></div>
+
+  <h1 class="title f">Sanación <em>del</em><span class="l2">niño <em>interior</em></span></h1>
+
+  <div class="foot">
+    <div class="by"><span>by</span>Coloreando Corazones</div>
+    <div class="dot"></div>
+    <div class="place">Oriente Antioqueño</div>
+  </div>
+
+  <div class="arch-o"></div>
+  <div class="arch">
+    <svg width="760" height="804" viewBox="0 0 760 804">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#F6D9A8" stop-opacity=".55"/>
+          <stop offset="1" stop-color="#F6D9A8" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="380" cy="470" r="330" fill="url(#glow)"/>
+      <g id="rays" stroke="#F6D9A8" stroke-opacity=".55" stroke-width="1.6"></g>
+      <circle cx="380" cy="470" r="128" fill="#F6D9A8"/>
+      <circle cx="380" cy="470" r="150" fill="none" stroke="#F6D9A8" stroke-opacity=".6" stroke-width="1.5"/>
+      <path d="M0 560 C 110 500, 200 520, 290 560 S 470 610, 560 545 S 700 500, 760 530 V804 H0Z" fill="#A69564"/>
+      <path d="M0 640 C 120 590, 230 610, 330 660 S 520 690, 620 630 S 720 610, 760 625 V804 H0Z" fill="#915B20"/>
+      <path d="M0 720 C 140 680, 260 700, 380 735 S 600 750, 760 705 V804 H0Z" fill="#4C2D1A"/>
+    </svg>
+  </div>
+  <div class="base"></div>
+
+  <svg class="grain" width="3000" height="1000"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+  <svg class="grain2" width="3000" height="1000"><filter id="n2"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="2"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#n2)"/></svg>
+</div>
+<script>
+const g=document.getElementById('rays');
+for(let i=0;i<48;i++){const a=i/48*Math.PI*2,r1=170,r2=i%2?300:380;
+ const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+ l.setAttribute('x1',380+Math.cos(a)*r1);l.setAttribute('y1',470+Math.sin(a)*r1);
+ l.setAttribute('x2',380+Math.cos(a)*r2);l.setAttribute('y2',470+Math.sin(a)*r2);g.appendChild(l);}
+</script>
+</body></html>
