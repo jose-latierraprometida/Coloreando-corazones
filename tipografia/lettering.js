@@ -50,18 +50,27 @@ let fid=0;
 function makeFilter(defs,cap,color,o){
  const id='raiz'+(fid++), s=cap/100, seed=o.seed||7;
  const f=el('filter',{id,x:'-10%',y:'-40%',width:'120%',height:'180%','color-interpolation-filters':'sRGB'});
- f.innerHTML=`
+f.innerHTML=`
   <feTurbulence type="fractalNoise" baseFrequency="${(0.05/s).toFixed(5)}" numOctaves="3" seed="${seed}" result="w"/>
   <feDisplacementMap in="SourceGraphic" in2="w" scale="${(o.wobble??3.4)*s}" xChannelSelector="R" yChannelSelector="G" result="d1"/>
   <feGaussianBlur in="d1" stdDeviation="${(o.ink??3.0)*s}" result="b"/>
-  <feComponentTransfer in="b" result="g"><feFuncA type="linear" slope="14" intercept="-6.3"/></feComponentTransfer>
-  <feTurbulence type="fractalNoise" baseFrequency="${(0.14/s).toFixed(5)}" numOctaves="3" seed="${seed+5}" result="r"/>
-  <feDisplacementMap in="g" in2="r" scale="${(o.fiber??1.8)*s}" xChannelSelector="R" yChannelSelector="G" result="d2"/>
-  <feGaussianBlur in="d2" stdDeviation="${(0.32*s).toFixed(2)}" result="soft"/>
-  <feComponentTransfer in="soft" result="edge"><feFuncA type="linear" slope="2.2" intercept="-0.55"/></feComponentTransfer>
-  <feTurbulence type="fractalNoise" baseFrequency="${(0.06/s).toFixed(5)}" numOctaves="3" seed="${seed+11}" result="m"/>
-  <feColorMatrix in="m" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.22 0 0 0 0.86" result="mA"/>
-  <feComposite in="edge" in2="mA" operator="arithmetic" k1="1" result="ink"/>
+  <!-- borde fibroso: ruido fino sumado antes del umbral -->
+  <feTurbulence type="fractalNoise" baseFrequency="${(o.fiberF??0.3)}" numOctaves="3" seed="${seed+5}" result="fn"/>
+  <feColorMatrix in="fn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="fnA"/>
+  <feTurbulence type="fractalNoise" baseFrequency="${(0.12/s).toFixed(5)}" numOctaves="2" seed="${seed+6}" result="mn"/>
+  <feColorMatrix in="mn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="mnA"/>
+  <feComposite in="fnA" in2="mnA" operator="arithmetic" k2="${o.edge??0.28}" k3="0.3" result="nz"/>
+  <feComposite in="b" in2="nz" operator="arithmetic" k2="1" k3="1" k4="-0.29" result="bn"/>
+  <feComponentTransfer in="bn" result="g"><feFuncA type="linear" slope="13" intercept="-6.0"/></feComponentTransfer>
+  <feGaussianBlur in="g" stdDeviation="0.45" result="soft"/>
+  <feComponentTransfer in="soft" result="edge"><feFuncA type="linear" slope="1.6" intercept="-0.3"/></feComponentTransfer>
+  <!-- grano del papel dentro de la tinta -->
+  <feTurbulence type="fractalNoise" baseFrequency="${o.grainF??0.75}" numOctaves="2" seed="${seed+9}" result="gr"/>
+  <feColorMatrix in="gr" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  ${o.grain??0.9} 0 0 0 ${0.98-(o.grain??0.9)*0.5}" result="grA"/>
+  <feTurbulence type="fractalNoise" baseFrequency="${(0.05/s).toFixed(5)}" numOctaves="3" seed="${seed+11}" result="m"/>
+  <feColorMatrix in="m" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.3 0 0 0 0.82" result="mA"/>
+  <feComposite in="grA" in2="mA" operator="arithmetic" k1="1" result="tex"/>
+  <feComposite in="edge" in2="tex" operator="arithmetic" k1="1" result="ink"/>
   <feFlood flood-color="${color}"/><feComposite in2="ink" operator="in"/>`;
  defs.appendChild(f); return id;
 }
