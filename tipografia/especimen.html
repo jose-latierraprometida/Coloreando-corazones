@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>html,body{margin:0;width:3000px;height:2000px;overflow:hidden;background:#F6D9A8}svg{position:absolute;inset:0}</style></head><body>
+<svg id="s" width="3000" height="2000"><defs><filter id="paper"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" seed="4"/><feColorMatrix type="saturate" values="0"/></filter>
+<filter id="paper2"><feTurbulence type="fractalNoise" baseFrequency=".006" numOctaves="3" seed="2"/><feColorMatrix type="saturate" values="0"/></filter></defs>
+<rect width="3000" height="2000" fill="#F6D9A8"/></svg>
+<script src="lettering.js"></script>
+<script>
+const s=document.getElementById('s'),NS='http://www.w3.org/2000/svg', B='#4C2D1A', T='#9B5137', O='#915B20', V='#A69564';
+const mk=(n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);s.appendChild(e);return e;};
+const rule=(y)=>mk('line',{x1:180,y1:y,x2:2820,y2:y,stroke:B,'stroke-width':2,opacity:.7});
+// fit helper
+const fit=(t,maxW,o)=>{const w=measureRaiz(t,Object.assign({},o,{cap:100}));return Math.min(o.cap,maxW/w*100);};
+drawRaiz(s,'RAÍZ',{x:180,y:200,cap:40,color:T,track:50,weight:12,seed:3});
+drawRaiz(s,'TIPOGRAFÍA PROPIA · COLOREANDO CORAZONES',{x:2820,y:200,cap:40,color:B,track:50,weight:12,seed:4,align:'right'});
+rule(270);
+const a1={cap:190,track:36,weight:11,seed:11};const c1=Math.min(fit('ABCDEFGHIJKLMN',2640,a1),fit('ÑOPQRSTUVWXYZ&',2640,a1));
+drawRaiz(s,'ABCDEFGHIJKLMN',Object.assign(a1,{cap:c1,x:1500,y:560,color:B,align:'center'}));
+drawRaiz(s,'ÑOPQRSTUVWXYZ&',Object.assign({},a1,{cap:c1,x:1500,y:860,seed:12,color:B,align:'center'}));
+rule(960);
+drawRaiz(s,'SANACIÓN DEL',{x:180,y:1250,cap:150,color:T,track:40,weight:11,seed:21});
+drawRaiz(s,'NIÑO INTERIOR',{x:180,y:1520,cap:150,color:O,track:40,weight:11,seed:22});
+// textura de muestra del desgaste en grande
+drawRaiz(s,'Ō',{x:2560,y:1520,cap:380,color:V,track:0,weight:11,seed:5,align:'center'});
+rule(1650);
+drawRaiz(s,'ORIENTE ANTIOQUEÑO · HOLISTIC WELLNESS',{x:180,y:1800,cap:44,color:B,track:48,weight:12,seed:31});
+['#F6D9A8','#A69564','#4C2D1A','#9B5137','#915B20'].forEach((c,i)=>mk('circle',{cx:2460+i*90,cy:1778,r:34,fill:c,stroke:B,'stroke-width':1.5}));
+mk('rect',{width:3000,height:2000,filter:'url(#paper)',opacity:.16,style:'mix-blend-mode:multiply'});
+mk('rect',{width:3000,height:2000,filter:'url(#paper2)',opacity:.1,style:'mix-blend-mode:multiply'});
+</script></body></html>

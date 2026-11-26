@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>html,body{margin:0;width:3000px;height:1000px;overflow:hidden;background:#4C2D1A}svg{position:absolute;inset:0}</style></head><body>
+<svg id="s" width="3000" height="1000"><defs>
+ <radialGradient id="bg" cx="30%" cy="45%" r="65%"><stop offset="0" stop-color="#5c3822"/><stop offset=".6" stop-color="#4C2D1A"/><stop offset="1" stop-color="#3d2313"/></radialGradient>
+ <radialGradient id="glow"><stop offset="0" stop-color="#F6D9A8" stop-opacity=".55"/><stop offset="1" stop-color="#F6D9A8" stop-opacity="0"/></radialGradient>
+ <clipPath id="arch"><path d="M0 804 V380 A380 380 0 0 1 760 380 V804Z"/></clipPath>
+ <filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+ <filter id="n2"><feTurbulence type="fractalNoise" baseFrequency=".008" numOctaves="3" seed="3"/><feColorMatrix type="saturate" values="0"/></filter>
+</defs>
+<rect width="3000" height="1000" fill="url(#bg)"/>
+<path d="M2016 914 V490 A404 404 0 0 1 2824 490 V914" fill="none" stroke="#F6D9A8" stroke-opacity=".45" stroke-width="1.5"/>
+<g transform="translate(2040 110)" clip-path="url(#arch)">
+ <rect width="760" height="804" fill="#9B5137"/>
+ <circle cx="380" cy="470" r="330" fill="url(#glow)"/>
+ <g id="rays" stroke="#F6D9A8" stroke-opacity=".55" stroke-width="1.6"></g>
+ <circle cx="380" cy="470" r="128" fill="#F6D9A8"/>
+ <circle cx="380" cy="470" r="150" fill="none" stroke="#F6D9A8" stroke-opacity=".6" stroke-width="1.5"/>
+ <path d="M0 560 C 110 500, 200 520, 290 560 S 470 610, 560 545 S 700 500, 760 530 V804 H0Z" fill="#A69564"/>
+ <path d="M0 640 C 120 590, 230 610, 330 660 S 520 690, 620 630 S 720 610, 760 625 V804 H0Z" fill="#915B20"/>
+ <path d="M0 720 C 140 680, 260 700, 380 735 S 600 750, 760 705 V804 H0Z" fill="#4C2D1A"/>
+</g>
+<line x1="1940" y1="914" x2="2940" y2="914" stroke="#F6D9A8" stroke-opacity=".45" stroke-width="1.5"/>
+<line x1="170" y1="820" x2="1800" y2="820" stroke="#F6D9A8" stroke-opacity=".3" stroke-width="1.5"/>
+</svg>
+<script src="../tipografia/lettering.js"></script>
+<script>
+const s=document.getElementById('s'),NS='http://www.w3.org/2000/svg',C='#F6D9A8',V='#A69564',T='#C97A5A';
+const g=document.getElementById('rays');
+for(let i=0;i<48;i++){const a=i/48*Math.PI*2,r2=i%2?300:380,l=document.createElementNS(NS,'line');
+ [['x1',380+Math.cos(a)*170],['y1',470+Math.sin(a)*170],['x2',380+Math.cos(a)*r2],['y2',470+Math.sin(a)*r2]].forEach(([k,v])=>l.setAttribute(k,v));g.appendChild(l);}
+const rw=drawRaiz(s,'RETIRO',{x:170,y:156,cap:36,color:C,track:60,weight:13,seed:2});
+const ln=document.createElementNS(NS,'line');[['x1',170+rw+40],['y1',138],['x2',170+rw+150],['y2',138],['stroke',V],['stroke-width',2]].forEach(([k,v])=>ln.setAttribute(k,v));s.appendChild(ln);
+const o={cap:150,track:30,weight:12};
+const cap=Math.min(150,1640/measureRaiz('NIÑO INTERIOR',Object.assign({},o,{cap:100}))*100);
+drawRaiz(s,'SANACIÓN DEL',Object.assign({},o,{cap,x:165,y:470,color:C,seed:41}));
+drawRaiz(s,'NIÑO INTERIOR',Object.assign({},o,{cap,x:165,y:470+cap*1.55,color:V,seed:42}));
+const bw=drawRaiz(s,'BY COLOREANDO CORAZONES',{x:170,y:900,cap:30,color:C,track:48,weight:13,seed:5});
+const dot=document.createElementNS(NS,'circle');[['cx',170+bw+45],['cy',885],['r',6],['fill','#C97A5A']].forEach(([k,v])=>dot.setAttribute(k,v));s.appendChild(dot);
+drawRaiz(s,'ORIENTE ANTIOQUEÑO',{x:170+bw+90,y:900,cap:30,color:V,track:48,weight:13,seed:6});
+const mk=(a)=>{const e=document.createElementNS(NS,'rect');for(const k in a)e.setAttribute(k,a[k]);s.appendChild(e);};
+mk({width:3000,height:1000,filter:'url(#n)',opacity:.5,style:'mix-blend-mode:overlay'});
+mk({width:3000,height:1000,filter:'url(#n2)',opacity:.08});
+</script></body></html>
