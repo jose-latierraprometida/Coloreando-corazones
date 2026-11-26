@@ -67,24 +67,54 @@ function makeFilter(defs,cap,color,o){
   <feFlood flood-color="${color}"/><feComposite in2="h2" operator="in"/>`;
  defs.appendChild(f); return id;
 }
-// Dibuja texto. opts: x,y(baseline),cap,color,track(unid.),weight(unid.),seed,align
-window.measureRaiz=function(text,o){o=Object.assign({cap:100,track:22,weight:11},o);let x=0;[...text].forEach(ch=>{const g=glyph(ch);x+=g.w+o.weight+(ch===' '?0:o.track);});return (x-o.track)*o.cap/100;};
+// ---- Motor "pincel": convierte cada trazo central en una forma de grosor variable ----
+let probe=null;
+function probePath(d){ if(!probe){const sv=el('svg',{width:0,height:0,style:'position:absolute'});document.body.appendChild(sv);probe=el('path',{});sv.appendChild(probe);} probe.setAttribute('d',d); return probe; }
+function field(R,amp,freq){ // campo de deformación suave 2D (esqueleto orgánico)
+  const p=[R()*6.28,R()*6.28,R()*6.28,R()*6.28],f=[freq*(0.8+R()*.4),freq*(0.8+R()*.4),freq*(1.6+R()*.6),freq*(1.6+R()*.6)];
+  return (x,y)=>[amp*(Math.sin(y*f[0]+p[0])*.7+Math.sin(x*f[2]+p[2])*.3), amp*(Math.sin(x*f[1]+p[1])*.7+Math.sin(y*f[3]+p[3])*.3)];
+}
+function brushStroke(d,o,R,warp){
+  const path=probePath(d), L=path.getTotalLength(); if(L<1)return '';
+  const n=Math.max(12,Math.round(L/1.6)), pts=[];
+  for(let i=0;i<=n;i++){const q=path.getPointAtLength(L*i/n);const w=warp(q.x,q.y);pts.push([q.x+w[0],q.y+w[1]]);}
+  const closed=Math.hypot(pts[0][0]-pts[n][0],pts[0][1]-pts[n][1])<0.5;
+  const ang=o.nib*Math.PI/180, ph=R()*6.28, ph2=R()*6.28, press=0.85+R()*.3, endT=0.82+R()*.12;
+  const left=[],right=[];
+  for(let i=0;i<=n;i++){
+    const a=pts[Math.max(0,i-1)], b=pts[Math.min(n,i+1)], th=Math.atan2(b[1]-a[1],b[0]-a[0]);
+    const t=i/n;
+    let w=o.weight*(o.contrast+(1-o.contrast)*Math.abs(Math.sin(th-ang)));      // pincel plano inclinado
+    w*=1+0.10*Math.sin(t*9.4+ph)+0.06*Math.sin(t*23+ph2);                     // pulso irregular
+    if(!closed){ w*= t<0.08 ? press*(0.85+t/0.08*0.25) : 1;                      // entrada con presión
+                 if(t>endT) w*=1-((t-endT)/(1-endT))*0.45; }                     // salida que afina
+    const nx=-Math.sin(th), ny=Math.cos(th);
+    left.push([pts[i][0]+nx*w/2,pts[i][1]+ny*w/2]); right.push([pts[i][0]-nx*w/2,pts[i][1]-ny*w/2]);
+  }
+  const f=v=>v[0].toFixed(2)+' '+v[1].toFixed(2);
+  if(closed) return 'M'+left.map(f).join('L')+'Z M'+right.reverse().map(f).join('L')+'Z';
+  return 'M'+left.map(f).join('L')+'L'+right.reverse().map(f).join('L')+'Z';
+}
+window.measureRaiz=function(text,o){o=Object.assign({cap:100,track:22,weight:13},o);let x=0;[...text].forEach(ch=>{const g=glyph(ch);x+=g.w+o.weight+(ch===' '?0:o.track);});return (x-o.track)*o.cap/100;};
+// Dibuja texto. opts: x,y(baseline),cap,color,track(unid.),weight(unid.),seed,align,jitter
 window.drawRaiz=function(svg,text,opts){
- const o=Object.assign({cap:100,color:'#000',track:22,weight:11,seed:7,align:'left',jitter:1},opts);
- const s=o.cap/100, R=rng(o.seed*97+text.length), sw=o.weight;
+ const o=Object.assign({cap:100,color:'#000',track:22,weight:13,seed:7,align:'left',jitter:1,nib:-35,contrast:.42,warp:3.2},opts);
+ const s=o.cap/100, R=rng(o.seed*97+text.length);
  let defs=svg.querySelector('defs'); if(!defs){defs=el('defs',{});svg.prepend(defs);}
- const fidv=makeFilter(defs,o.cap,o.color,o);
+ const fidv=makeFilter(defs,o.cap,o.color,Object.assign({wobble:2.2,ink:1.1,rough:1.2,speck:.73,wear:.66},o));
  const outer=el('g',{filter:`url(#${fidv})`}); const inner=el('g',{});
- let x=0; const chars=[...text];
- chars.forEach((ch,i)=>{
-  const g=glyph(ch); const r=(R()-.5)*2.4*o.jitter, dy=(R()-.5)*2.2*o.jitter, sc=1+(R()-.5)*.035*o.jitter;
-  const gx=x+sw/2; const grp=el('g',{transform:`translate(${gx} ${dy}) rotate(${r} ${g.w/2} 50) scale(${sc})`});
-  if(g.d) grp.appendChild(el('path',{d:g.d,fill:'none',stroke:'#000','stroke-width':sw*(1+(R()-.5)*.08),'stroke-linecap':'round','stroke-linejoin':'round'}));
-  (g.f||[]).forEach(fx=>{ const rw=sw*(0.85+R()*.3), rh=sw*(0.26+R()*.14);
-    grp.appendChild(el('ellipse',{cx:fx,cy:100-rh*.55,rx:rw,ry:rh,fill:'#000'})); });
-  if(g.dot) grp.appendChild(el('circle',{cx:g.dot[0],cy:g.dot[1]-(g.dot[1]===100?sw*.5:0),r:sw*.75,fill:'#000'}));
+ let x=0;
+ [...text].forEach(ch=>{
+  const g=glyph(ch), J=o.jitter;
+  const r=(R()-.5)*5*J, dy=(R()-.5)*5*J, sx=1+(R()-.5)*.09*J, sy=1+(R()-.5)*.08*J, sk=(R()-.5)*5*J;
+  const grp=el('g',{transform:`translate(${x+o.weight/2} ${dy+(1-sy)*100}) rotate(${r} ${g.w/2} 50) skewX(${sk}) scale(${sx} ${sy})`});
+  const warp=field(R,o.warp*J,0.045);
+  if(g.d){ const subs=g.d.split(/(?=M)/).filter(t=>t.trim()); let dd='';
+    subs.forEach(sp=>dd+=brushStroke(sp,o,R,warp)+' ');
+    grp.appendChild(el('path',{d:dd,fill:'#000','fill-rule':'nonzero'})); }
+  if(g.dot){const w=warp(g.dot[0],g.dot[1]);grp.appendChild(el('ellipse',{cx:g.dot[0]+w[0],cy:g.dot[1]-(g.dot[1]===100?o.weight*.5:0),rx:o.weight*.8,ry:o.weight*.65,transform:`rotate(${R()*60})`,fill:'#000'}));}
   inner.appendChild(grp);
-  x+=g.w+sw+(ch===' '?0:o.track);
+  x+=g.w*sx+o.weight+(ch===' '?0:o.track);
  });
  const width=(x-o.track)*s; let x0=o.x; if(o.align==='center')x0-=width/2; if(o.align==='right')x0-=width;
  inner.setAttribute('transform',`translate(${x0} ${o.y-o.cap}) scale(${s})`);

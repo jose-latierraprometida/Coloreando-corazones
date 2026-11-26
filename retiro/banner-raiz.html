@@ -28,15 +28,15 @@ const s=document.getElementById('s'),NS='http://www.w3.org/2000/svg',C='#F6D9A8'
 const g=document.getElementById('rays');
 for(let i=0;i<48;i++){const a=i/48*Math.PI*2,r2=i%2?300:380,l=document.createElementNS(NS,'line');
  [['x1',380+Math.cos(a)*170],['y1',470+Math.sin(a)*170],['x2',380+Math.cos(a)*r2],['y2',470+Math.sin(a)*r2]].forEach(([k,v])=>l.setAttribute(k,v));g.appendChild(l);}
-const rw=drawRaiz(s,'RETIRO',{x:170,y:156,cap:36,color:C,track:60,weight:13,seed:2});
+const rw=drawRaiz(s,'RETIRO',{x:170,y:156,cap:36,color:C,track:60,weight:16,seed:2});
 const ln=document.createElementNS(NS,'line');[['x1',170+rw+40],['y1',138],['x2',170+rw+150],['y2',138],['stroke',V],['stroke-width',2]].forEach(([k,v])=>ln.setAttribute(k,v));s.appendChild(ln);
-const o={cap:150,track:30,weight:12};
+const o={cap:150,track:30,weight:17};
 const cap=Math.min(150,1640/measureRaiz('NIÑO INTERIOR',Object.assign({},o,{cap:100}))*100);
 drawRaiz(s,'SANACIÓN DEL',Object.assign({},o,{cap,x:165,y:470,color:C,seed:41}));
 drawRaiz(s,'NIÑO INTERIOR',Object.assign({},o,{cap,x:165,y:470+cap*1.55,color:V,seed:42}));
-const bw=drawRaiz(s,'BY COLOREANDO CORAZONES',{x:170,y:900,cap:30,color:C,track:48,weight:13,seed:5});
+const bw=drawRaiz(s,'BY COLOREANDO CORAZONES',{x:170,y:900,cap:30,color:C,track:48,weight:16,seed:5});
 const dot=document.createElementNS(NS,'circle');[['cx',170+bw+45],['cy',885],['r',6],['fill','#C97A5A']].forEach(([k,v])=>dot.setAttribute(k,v));s.appendChild(dot);
-drawRaiz(s,'ORIENTE ANTIOQUEÑO',{x:170+bw+90,y:900,cap:30,color:V,track:48,weight:13,seed:6});
+drawRaiz(s,'ORIENTE ANTIOQUEÑO',{x:170+bw+90,y:900,cap:30,color:V,track:48,weight:16,seed:6});
 const mk=(a)=>{const e=document.createElementNS(NS,'rect');for(const k in a)e.setAttribute(k,a[k]);s.appendChild(e);};
 mk({width:3000,height:1000,filter:'url(#n)',opacity:.5,style:'mix-blend-mode:overlay'});
 mk({width:3000,height:1000,filter:'url(#n2)',opacity:.08});
