@@ -51,8 +51,8 @@ function makeFilter(defs,cap,color,o){
  const id='raiz'+(fid++), s=cap/100, seed=o.seed||7;
  const f=el('filter',{id,x:'-10%',y:'-40%',width:'120%',height:'180%','color-interpolation-filters':'sRGB'});
 f.innerHTML=`
-  <feTurbulence type="fractalNoise" baseFrequency="${(0.05/s).toFixed(5)}" numOctaves="3" seed="${seed}" result="w"/>
-  <feDisplacementMap in="SourceGraphic" in2="w" scale="${(o.wobble??3.4)*s}" xChannelSelector="R" yChannelSelector="G" result="d1"/>
+  <feTurbulence type="fractalNoise" baseFrequency="${(0.11/s).toFixed(5)}" numOctaves="2" seed="${seed}" result="w"/>
+  <feDisplacementMap in="SourceGraphic" in2="w" scale="${(o.wobble??2.0)*s}" xChannelSelector="R" yChannelSelector="G" result="d1"/>
   <feGaussianBlur in="d1" stdDeviation="${(o.ink??3.0)*s}" result="b"/>
   <!-- borde fibroso: ruido fino sumado antes del umbral -->
   <feTurbulence type="fractalNoise" baseFrequency="${(o.fiberF??0.3)}" numOctaves="3" seed="${seed+5}" result="fn"/>
@@ -83,10 +83,13 @@ function field(R,amp,freq){
 // Trazo con contraste (verticales gruesas, horizontales finas) y astas que se abren en los extremos.
 function inkStroke(d,o,R,warp){
   const path=probePath(d), L=path.getTotalLength(); if(L<1)return '';
-  const n=Math.max(16,Math.round(L/1.2)), pts=[];
-  for(let i=0;i<=n;i++){const q=path.getPointAtLength(L*i/n);const w=warp(q.x,q.y);pts.push([q.x+w[0],q.y+w[1]]);}
+  let n=Math.max(16,Math.round(L/1.2)); const pts=[];
+  for(let i=0;i<=n;i++){const q=path.getPointAtLength(L*i/n);const w=warp(q.x,q.y);pts.push([q.x+w[0],q.y+w[1]*Math.min(1,Math.min(Math.abs(q.y),Math.abs(100-q.y))/12)]);}
   const closed=Math.hypot(pts[0][0]-pts[n][0],pts[0][1]-pts[n][1])<0.5;
-  const ang=o.nib*Math.PI/180, k=1+(R()-.5)*.08, ph=R()*6.28, fl=o.flare*(0.8+R()*.4);
+  if(!closed){ // compensación óptica: la tinta corrida acorta los extremos rectos
+    const ext=o.weight*0.42, ex=(p,q)=>{const dx=p[0]-q[0],dy=p[1]-q[1],l=Math.hypot(dx,dy)||1;return [p[0]+dx/l*ext,p[1]+dy/l*ext];};
+    pts.unshift(ex(pts[0],pts[1])); pts.push(ex(pts[pts.length-1],pts[pts.length-2])); n+=2; }
+  const ang=o.nib*Math.PI/180, k=1+(R()-.5)*.03, ph=R()*6.28, fl=o.flare*(0.8+R()*.4);
   const left=[],right=[];
   for(let i=0;i<=n;i++){
     const a=pts[Math.max(0,i-1)], b=pts[Math.min(n,i+1)], th=Math.atan2(b[1]-a[1],b[0]-a[0]), t=i/n;
@@ -103,14 +106,14 @@ function inkStroke(d,o,R,warp){
 window.measureRaiz=function(text,o){o=Object.assign({cap:100,track:22,weight:16},o);let x=0;[...text].forEach(ch=>{const g=glyph(ch);x+=g.w+o.weight+(ch===' '?0:o.track);});return (x-o.track)*o.cap/100;};
 // Dibuja texto. opts: x,y(baseline),cap,color,track,weight,seed,align,jitter
 window.drawRaiz=function(svg,text,opts){
- const o=Object.assign({cap:100,color:'#000',track:24,weight:16,seed:7,align:'left',jitter:1,nib:-12,contrast:.72,flare:.36,warp:1.1},opts);
+ const o=Object.assign({cap:100,color:'#000',track:24,weight:16,seed:7,align:'left',jitter:1,nib:-12,contrast:.72,flare:.36,warp:0.45},opts);
  const s=o.cap/100, R=rng(o.seed*97+text.length);
  let defs=svg.querySelector('defs'); if(!defs){defs=el('defs',{});svg.prepend(defs);}
  const fidv=makeFilter(defs,o.cap,o.color,o);
  const outer=el('g',{filter:`url(#${fidv})`}); const inner=el('g',{});
  let x=0;
  [...text].forEach(ch=>{
-  const g=glyph(ch), J=o.jitter, r=(R()-.5)*1.4*J, dy=(R()-.5)*1.6*J;
+  const g=glyph(ch), J=o.jitter, r=(R()-.5)*0.5*J, dy=0;
   const grp=el('g',{transform:`translate(${x+o.weight/2} ${dy}) rotate(${r} ${g.w/2} 50)`});
   const warp=field(R,o.warp*J,0.05);
   if(g.d){ let dd=''; g.d.split(/(?=M)/).filter(t=>t.trim()).forEach(sp=>dd+=inkStroke(sp,o,R,warp)+' ');
