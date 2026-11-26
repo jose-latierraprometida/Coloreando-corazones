@@ -103,6 +103,7 @@ function inkStroke(d,o,R,warp){
   if(closed) return 'M'+left.map(f).join('L')+'Z M'+right.reverse().map(f).join('L')+'Z';
   return 'M'+left.map(f).join('L')+'L'+right.reverse().map(f).join('L')+'Z';
 }
+window.inkFilter=function(svg,cap,color,o){let defs=svg.querySelector('defs'); if(!defs){defs=el('defs',{});svg.prepend(defs);} return makeFilter(defs,cap,color,Object.assign({seed:3},o||{}));};
 window.measureRaiz=function(text,o){o=Object.assign({cap:100,track:22,weight:16},o);let x=0;[...text].forEach(ch=>{const g=glyph(ch);x+=g.w+o.weight+(ch===' '?0:o.track);});return (x-o.track)*o.cap/100;};
 // Dibuja texto. opts: x,y(baseline),cap,color,track,weight,seed,align,jitter
 window.drawRaiz=function(svg,text,opts){
